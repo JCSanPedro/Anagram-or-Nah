@@ -1,0 +1,35 @@
+* {
+	font-family: Georgia;
+	text-align: center;
+	font-size: 40px;
+	font-weight: none;
+}
+
+div {
+	padding: 10px 0px 10px 0px;
+	font-weight: none;
+}
+
+p {
+	display: inline;
+}
+
+#contain {
+	display: block;
+}
+
+button {
+	margin: 10px;
+	cursor: pointer;
+	transition: all .1s linear;
+	padding: 20px;
+}
+
+button:active {
+  box-shadow: 0 2px 0 #006599;
+  transform: translateY(3px);
+}
+
+#startText {
+	font-size: 20px;
+}

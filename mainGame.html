@@ -1,0 +1,345 @@
+<!DOCTYPE html>
+<html>
+
+	<head>
+		<link rel="stylesheet" type="text/css" href="mainGame.css" />
+		<title>Anagram, or Nah? - Game</title>
+				
+	</head>
+	
+	<body id="mainBody">
+		<h1>Anagram, or Nah?</h1>
+		<div id="scoreDiv">Score: 0</div>
+		<div>Time: <p id="timerDiv">10</p></div>
+		<div id="stringOneDiv">String 1: </div>
+		<div id="stringTwoDiv">String 2: </div>
+		<button id="yes" onClick="yesClicked()">Yes</button>
+		<button id="no" onClick="noClicked()">No</button>
+	</body>
+	
+	<script>
+		//Set all of the global variables
+		var myScore = 0;
+		var timerValue = 10;
+		var isAnagram = true;
+		var stringOne = "";
+		var stringTwo = "";
+		
+		//Create the timer variable and set its function
+		var timer = setInterval(function() {decreaseTimer()}, 1000);
+		
+		//Create the strings
+		updateStrings();
+		
+		/*
+		This function will run every second. It's purpose is to decrease the value of the timer, and also call the lose() function when the timer hits 0
+		*/
+		function decreaseTimer() {
+			timerValue = timerValue - 1;
+			var timerDiv = document.getElementById("timerDiv");
+
+			timerDiv.innerHTML = timerValue;
+			
+			if (timerValue < 5) {
+				timerDiv.style.color = "red";
+			} else {
+				timerDiv.style.color = "black";
+			}
+			
+			if (timerValue == 0) {
+				window.clearInterval(timer);
+				lose();
+			}
+					
+		}
+		
+		/*
+		Creates the first string
+		*/
+		function createStringOne() {
+			
+			//Create a random number between 5 and 9. This will set the length of the string.
+			var stringLength = Math.floor(Math.random() * 5 + 5);
+			
+			var charArray = [];
+			
+			for (i = 0; i < stringLength; i++) {
+				//For each character, generate a random character
+				charArray.push(genRandomChar());
+			}
+			return charArray.join("");
+
+		}
+		
+		/*
+		Generates a random character by generating a random value that corresponds to an ascii value
+		*/
+		function genRandomChar() {
+			//Gen number between 97 and 122
+			var randomVal = Math.floor(Math.random() * 26 + 97);
+			var randomChar = String.fromCharCode(randomVal);
+			
+			return randomChar;
+
+		}
+		
+		/*
+		Shuffles a string
+		*/
+		function shuffleString(str) {
+			var charArray = str.split("");
+			
+			for (i = 0; i < charArray.length; i++) {
+				randomIndex = Math.floor(Math.random() * charArray.length)
+				temp = charArray[i];
+				charArray[i] = charArray[randomIndex];
+				charArray[randomIndex] = temp;
+			}
+			
+			return charArray.join("");
+		}
+		
+		
+		/*
+		This will run through each character in the second string, and then may or may not swap the character for another randomly.
+		*/
+		function randomizeLetters(str) {
+			var charArray = str.split("");
+			
+			for(i = 0; i < charArray.length; i++) {
+				var randomVal = Math.floor(Math.random() * 100 + 1);
+				
+				if (randomVal < 15) {
+					var randC = genRandomChar();
+					if (randC != charArray[i]) {
+						charArray[i] = genRandomChar();
+					}
+				}	
+			}
+			
+			return charArray.join("");
+		}
+		
+		/*
+		This will run through each character in a string, and then may or may not capitalize that character
+		*/
+		function randomizeCapitalization(str) {
+			var charArray = str.split("");
+			
+			for (i = 0; i < charArray.length; i++) {
+				var randomVal = Math.floor(Math.random()*10 + 1);
+				
+				if (randomVal >= 6) {
+					charArray[i] = charArray[i].toUpperCase();
+				}
+			}
+			
+			return charArray.join("");
+		}
+		
+		/*
+		Randomly insert a character into the second string.
+		*/
+		function insertChar(str) {
+			var charArray = str.split("");
+			
+			for (i = 0; i < charArray.length; i++) {
+				var randomVal = Math.floor(Math.random() * 100 + 1);
+				
+				//If randomly gen value is less than 10, then insert random character at index
+				if (randomVal < 10) {
+					charArray.splice(i, 0, genRandomChar());
+				}
+			}
+			
+			return charArray.join("");
+		}
+		
+		/*
+		Randomly deletes a character from the second string
+		*/
+		function deleteChar(str) {
+			var charArray = str.split("");
+			
+			for (i = 0; i < charArray.length; i++) {
+				var randomVal = Math.floor(Math.random() * 100 + 1);
+				
+				//If randomly gen value is less than 10, then delete character
+				if (randomVal < 10) {
+					charArray.splice(i, 1);
+				}
+			}
+			
+			return charArray.join("");
+		}
+		
+		/*
+		Randomly insert between 0 to 4 spaces in a string
+		*/
+		function insertSpaces(str) {
+			var charArray = str.split("");
+			var numberOfSpaces = 0;
+			
+			for (i = 0; i < charArray.length; i++) {
+				var randomVal = Math.floor(Math.random() * 100 + 1);
+				
+				if ((randomVal - numberOfSpaces * 10) > 0 && randomVal <= 30) {
+					charArray.splice(i, 0, " ");
+				}
+			}
+			
+			return charArray.join("");
+			
+		}
+		
+		/*
+		This function is called to modify the second string
+		*/
+		function randomModString(str) {
+			//Gen number between 1 and 10
+			var randomVal = Math.floor(Math.random() * 10 + 1);
+			
+			//60% chance that the second string will go through modification
+			if (randomVal > 4) {
+				return randomizeLetters(insertChar(deleteChar(str)));
+			} else {
+				return str;
+			}
+		}
+		
+		/*
+		Function called when yes button clicked
+		*/
+		function yesClicked() {
+			if (isAnagram) {
+				updateScore();
+				timerValue = 10;
+			} else {
+				lose();
+			}
+		}
+		
+		/*
+		Function called when no button clicked
+		*/
+		function noClicked() {
+			if (isAnagram) {
+				lose();
+			} else {
+				updateScore();
+				timerValue = 10;
+			}
+		}
+		
+		/*
+		Function called if player answers correctly
+		*/
+		function updateScore() {
+			myScore++;
+			document.getElementById("scoreDiv").innerHTML = "Score: " + myScore;
+			updateStrings();
+		}
+		
+		/*
+		This function will generate the two strings that will be compared to each other. It is called at the start of the game, and also at each
+		time the player answers correctly.
+		*/
+		function updateStrings() {
+			stringOne = createStringOne();
+			
+			//Create string two by randomly shuffling string one
+			stringTwo = shuffleString(stringOne);
+			
+			//Initially set the isAnagram value to true
+			isAnagram = true;
+			
+			//Put the second string through random modification
+			stringTwo = randomModString(stringTwo);
+			
+			//Capitalize both strings
+			stringOne = randomizeCapitalization(stringOne);
+			stringTwo = randomizeCapitalization(stringTwo);
+			
+			//Determine if the two strings are anagrams
+			checkIfAnagram(stringOne, stringTwo);
+		
+			//Randomly insert spaces into the two strings
+			stringOne = insertSpaces(stringOne);
+			stringTwo = insertSpaces(stringTwo);
+			
+			//Display the strings
+			document.getElementById("stringOneDiv").innerHTML = "String 1: " + (stringOne);
+			document.getElementById("stringTwoDiv").innerHTML = "String 2: " + (stringTwo);
+		}
+		
+		/*
+		This function uses a hash table to determine if two strings are anagrams or not.
+		*/
+		function checkIfAnagram(strOne, strTwo) {
+			//First set both strings to lower case
+			strOne = strOne.toLowerCase();
+			strTwo = strTwo.toLowerCase();
+		
+			//Turn strings into character arrays
+			var strOneArr = strOne.split("");
+			var strTwoArr = strTwo.split("");
+			
+			//If length noth equal, then it is not anagram
+			if (strOneArr.length != strTwoArr.length) {
+				isAnagram = false;
+				return null;
+			}
+			
+			//Initialise array
+			var hashTable = [];
+			
+			//For each character in string one, push a value into the hash table with key c as character in string
+			for (i = 0; i < strOneArr.length; i++) {
+				var c = strOneArr[i];
+				//If value with key c exists, then add 1 to the value
+				if (hashTable.hasOwnProperty(c)) {
+					hashTable[c] = hashTable[c] + 1;
+				} else {
+					hashTable[c] = 1;
+				}
+			}
+			
+			//Each character in string two is key a, and subtract 1 from each corresponding value with key a
+			for (i = 0; i < strTwoArr.length; i++) {
+				var a = strTwoArr[i];
+				if (hashTable.hasOwnProperty(a)) {
+					hashTable[a] = hashTable[a] - 1;
+				} else { //If the hash table does not have corresponding value with key a, then it is not anagram
+					isAnagram = false;
+					return null;
+				}
+			}
+			
+			//Iterate through hash table, if any of the values does not equal 0, then it is not hash table
+			for (var k in hashTable) {
+				if (hashTable.hasOwnProperty(k)) {
+					if (hashTable[k] != 0) {
+						console.log(hashTable[k]);
+						isAnagram = false;
+						return null;
+					}
+				}
+			}
+			
+		}
+		
+		/*
+		Called when the player loses
+		*/
+		function lose() {
+			if (isAnagram) {
+				document.getElementById("mainBody").innerHTML = "The Strings \"" + stringOne + "\" and \"" + stringTwo + "\" were Annagrams!"
+			} else {
+				document.getElementById("mainBody").innerHTML = "The Strings \"" + stringOne + "\" and \"" + stringTwo + "\" were not Annagrams!"
+			}
+			
+			document.getElementById("mainBody").innerHTML = document.getElementById("mainBody").innerHTML + "<br>You lost with a score of " + myScore + "! Refresh to try again!";
+		}
+
+	</script>
+</html>
